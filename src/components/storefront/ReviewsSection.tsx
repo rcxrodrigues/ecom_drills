@@ -54,32 +54,40 @@ export function ReviewsSection({
           </div>
         </div>
 
-        <div className="flex flex-col divide-y divide-border-subtle">
-          {reviews.length === 0 && <p className="text-sm text-foreground">No reviews yet — be the first to leave one.</p>}
-          {reviews.map((r) => (
-            <div key={r.id} className="py-4 first:pt-0">
-              <div className="flex items-center justify-between">
-                <StarRating rating={r.rating} />
-                <span className="text-xs text-foreground/60">{formatDate(r.createdAt)}</span>
-              </div>
-              {r.title && <p className="mt-2 text-sm font-semibold text-foreground-strong">{r.title}</p>}
-              <p className="mt-1 text-sm text-foreground">{r.body}</p>
-              <div className="mt-2 flex items-center gap-2 text-xs text-foreground/70">
-                <span className="font-medium text-foreground-strong">{r.authorName}</span>
-                {r.location && <span>· {r.location}</span>}
-                {r.verifiedPurchase && (
-                  <span className="inline-flex items-center gap-1 rounded-input bg-neutral-100 px-1.5 py-0.5 font-medium">
-                    Verified Purchase
-                  </span>
-                )}
-              </div>
-              {r.adminReply && (
-                <div className="mt-3 rounded-input bg-neutral-50 p-3 text-xs text-foreground">
-                  <span className="font-semibold text-foreground-strong">Toolvo Drills team:</span> {r.adminReply}
+        <div>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-foreground">No reviews yet — be the first to leave one.</p>
+          ) : (
+            <div className="scrollbar-hidden -mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
+              {reviews.map((r) => (
+                <div
+                  key={r.id}
+                  className="flex w-72 shrink-0 snap-start flex-col gap-2 rounded-button border border-border-subtle p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <StarRating rating={r.rating} />
+                    <span className="text-xs text-foreground/60">{formatDate(r.createdAt)}</span>
+                  </div>
+                  {r.title && <p className="text-sm font-semibold text-foreground-strong">{r.title}</p>}
+                  <p className="flex-1 text-sm text-foreground">{r.body}</p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-foreground/70">
+                    <span className="font-medium text-foreground-strong">{r.authorName}</span>
+                    {r.location && <span>· {r.location}</span>}
+                    {r.verifiedPurchase && (
+                      <span className="inline-flex items-center gap-1 rounded-input bg-neutral-100 px-1.5 py-0.5 font-medium">
+                        Verified Purchase
+                      </span>
+                    )}
+                  </div>
+                  {r.adminReply && (
+                    <div className="rounded-input bg-neutral-50 p-3 text-xs text-foreground">
+                      <span className="font-semibold text-foreground-strong">Toolvo Drills team:</span> {r.adminReply}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </div>
     </section>

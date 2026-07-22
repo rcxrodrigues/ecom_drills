@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PaymentIcons } from "./PaymentIcons";
 
 const menuLinks = [
   { href: "/collections/best-sellers", label: "Best Sellers" },
@@ -16,7 +17,6 @@ const policyLinks = [
   { href: "/policies/contact", label: "Contact" },
 ];
 
-const paymentMethods = ["Visa", "Mastercard", "Amex", "Maestro", "Apple Pay", "Google Pay", "Shop Pay", "PayPal"];
 const securityBadges = ["Secure SSL Checkout", "Verified Reviews", "Verified UK Store"];
 
 const socials = [
@@ -81,13 +81,7 @@ export function Footer() {
       <div className="border-t border-border-subtle">
         <div className="page-container flex flex-col gap-3 py-5">
           <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">Payment Methods</span>
-          <div className="flex flex-wrap gap-2">
-            {paymentMethods.map((p) => (
-              <span key={p} className="rounded-input border border-border-subtle px-2.5 py-1 text-xs font-medium text-foreground-strong">
-                {p}
-              </span>
-            ))}
-          </div>
+          <PaymentIcons />
         </div>
       </div>
 

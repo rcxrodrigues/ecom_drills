@@ -29,23 +29,12 @@ export function Header({ collections }: { collections: NavCollection[] }) {
             type="button"
             aria-label="Open menu"
             onClick={() => setMenuOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-input hover:bg-neutral-100 lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-input hover:bg-neutral-100"
           >
             <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" stroke="#121212" strokeWidth={1.6}>
               <path d="M2 5h16M2 10h16M2 15h16" strokeLinecap="round" />
             </svg>
           </button>
-          <nav className="hidden gap-6 lg:flex">
-            {collections.slice(0, 6).map((c) => (
-              <Link
-                key={c.handle}
-                href={`/collections/${c.handle}`}
-                className="text-sm font-medium text-foreground-strong hover:text-foreground"
-              >
-                {c.name}
-              </Link>
-            ))}
-          </nav>
         </div>
 
         <Link href="/" className="text-xl font-bold tracking-tight text-foreground-strong">
@@ -111,7 +100,7 @@ export function Header({ collections }: { collections: NavCollection[] }) {
       )}
 
       {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50">
           <button
             aria-label="Close menu"
             className="absolute inset-0 bg-black/40 animate-fade-in"

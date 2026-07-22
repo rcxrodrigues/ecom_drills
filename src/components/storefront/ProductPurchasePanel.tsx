@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice, discountPercentage } from "@/lib/format";
 import { DiscountBadge } from "@/components/ui/DiscountBadge";
-import { StarRating } from "@/components/ui/StarRating";
+import { VerifiedRatingBadge } from "@/components/ui/VerifiedRatingBadge";
 import { Button } from "@/components/ui/Button";
 
 type Variant = {
@@ -90,7 +90,7 @@ export function ProductPurchasePanel({
         <h1 className="text-2xl font-semibold text-foreground-strong sm:text-3xl">{name}</h1>
         {ratingCount > 0 && (
           <div className="mt-2">
-            <StarRating rating={avgRating} count={ratingCount} />
+            <VerifiedRatingBadge rating={avgRating} count={ratingCount} />
           </div>
         )}
       </div>
