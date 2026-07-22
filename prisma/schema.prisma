@@ -1,0 +1,242 @@
+// Toolvo Drills — data model
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- Enums ----------
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryMethod {
+  STANDARD
+  EXPRESS
+  NEXT_DAY
+}
+
+enum SectionType {
+  HERO
+  COUNTDOWN_BAR
+  COLLECTION_CAROUSEL
+  TESTIMONIALS
+  IMAGE_TEXT
+  FAQ
+  NEWSLETTER
+}
+
+// ---------- Accounts ----------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Customer {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  createdAt    DateTime  @default(now())
+  orders       Order[]
+  reviews      Review[]
+}
+
+// ---------- Catalogue ----------
+
+model Collection {
+  id              String              @id @default(cuid())
+  handle          String              @unique
+  name            String
+  description     String              @default("")
+  coverImage      String              @default("")
+  showOnHomepage  Boolean             @default(true)
+  position        Int                 @default(0)
+  autoIncludeDays Int?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  products        CollectionProduct[]
+}
+
+model Product {
+  id              String              @id @default(cuid())
+  handle          String              @unique
+  name            String
+  description     String              @default("")
+  brand           String              @default("Toolvo")
+  category        String              @default("")
+  price           Decimal             @db.Decimal(10, 2)
+  salePrice       Decimal?            @db.Decimal(10, 2)
+  sku             String              @unique
+  stock           Int                 @default(0)
+  power           String              @default("")
+  voltage         String              @default("")
+  batteryType     String              @default("")
+  torque          String              @default("")
+  weight          String              @default("")
+  includedItems   String              @default("")
+  specs           Json                @default("{}")
+  published       Boolean             @default(true)
+  views           Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  images          ProductImage[]
+  variants        ProductVariant[]
+  collections     CollectionProduct[]
+  reviews         Review[]
+  orderItems      OrderItem[]
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String  @default("")
+  position  Int     @default(0)
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  title      String
+  voltage    String      @default("")
+  colour     String      @default("")
+  kit        String      @default("")
+  sku        String      @unique
+  priceDelta Decimal     @default(0) @db.Decimal(10, 2)
+  stock      Int         @default(0)
+  position   Int         @default(0)
+  orderItems OrderItem[]
+}
+
+model CollectionProduct {
+  collectionId String
+  productId    String
+  position     Int        @default(0)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@id([collectionId, productId])
+}
+
+// ---------- Reviews ----------
+
+model Review {
+  id               String       @id @default(cuid())
+  productId        String
+  product          Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  customerId       String?
+  customer         Customer?    @relation(fields: [customerId], references: [id])
+  authorName       String
+  location         String       @default("")
+  rating           Int
+  title            String       @default("")
+  body             String
+  photoUrl         String?
+  verifiedPurchase Boolean      @default(false)
+  status           ReviewStatus @default(PENDING)
+  featured         Boolean      @default(false)
+  adminReply       String?
+  createdAt        DateTime     @default(now())
+}
+
+// ---------- Discounts ----------
+
+model DiscountCode {
+  id         String       @id @default(cuid())
+  code       String       @unique
+  type       DiscountType
+  value      Decimal      @db.Decimal(10, 2)
+  expiresAt  DateTime?
+  usageLimit Int?
+  usedCount  Int          @default(0)
+  active     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  orders     Order[]
+}
+
+// ---------- Orders ----------
+
+model Order {
+  id             String         @id @default(cuid())
+  orderNumber    String         @unique
+  customerId     String?
+  customer       Customer?      @relation(fields: [customerId], references: [id])
+  email          String
+  phone          String         @default("")
+  firstName      String
+  lastName       String
+  addressLine1   String
+  addressLine2   String         @default("")
+  city           String
+  postcode       String
+  deliveryMethod DeliveryMethod @default(STANDARD)
+  status         OrderStatus    @default(PENDING)
+  trackingNumber String?
+  subtotal       Decimal        @db.Decimal(10, 2)
+  discountCodeId String?
+  discountCode   DiscountCode?  @relation(fields: [discountCodeId], references: [id])
+  discountAmount Decimal        @default(0) @db.Decimal(10, 2)
+  shippingCost   Decimal        @default(0) @db.Decimal(10, 2)
+  total          Decimal        @db.Decimal(10, 2)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id           String          @id @default(cuid())
+  orderId      String
+  order        Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String?
+  product      Product?        @relation(fields: [productId], references: [id])
+  variantId    String?
+  variant      ProductVariant? @relation(fields: [variantId], references: [id])
+  name         String
+  variantTitle String          @default("")
+  image        String          @default("")
+  price        Decimal         @db.Decimal(10, 2)
+  quantity     Int
+}
+
+// ---------- Homepage / theme section builder ----------
+
+model Section {
+  id        String      @id @default(cuid())
+  page      String      @default("home")
+  type      SectionType
+  position  Int         @default(0)
+  enabled   Boolean     @default(true)
+  config    Json        @default("{}")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}

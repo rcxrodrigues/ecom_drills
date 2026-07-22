@@ -1,0 +1,11 @@
+export const ORDER_STATUSES = ["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
+
+export const SECTION_TYPES = [
+  "HERO",
+  "COUNTDOWN_BAR",
+  "COLLECTION_CAROUSEL",
+  "TESTIMONIALS",
+  "IMAGE_TEXT",
+  "FAQ",
+  "NEWSLETTER",
+] as const;
