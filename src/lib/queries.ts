@@ -200,6 +200,13 @@ export async function getCrossSellProducts(excludeProductId: string, limit = 4) 
     }));
 }
 
+export async function getSiteReviewSummary() {
+  const reviews = await prisma.review.findMany({ where: { status: "APPROVED" }, select: { rating: true } });
+  const count = reviews.length;
+  const avgRating = count ? reviews.reduce((s, r) => s + r.rating, 0) / count : 0;
+  return { avgRating, count };
+}
+
 export async function getFeaturedReviews(limit = 8) {
   const reviews = await prisma.review.findMany({
     where: { status: "APPROVED", featured: true },

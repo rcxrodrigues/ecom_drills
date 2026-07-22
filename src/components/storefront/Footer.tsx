@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { PaymentIcons } from "./PaymentIcons";
+import { SecurityBadges } from "./SecurityBadges";
+import { getSiteReviewSummary } from "@/lib/queries";
 
 const menuLinks = [
   { href: "/collections/best-sellers", label: "Best Sellers" },
@@ -17,15 +19,14 @@ const policyLinks = [
   { href: "/policies/contact", label: "Contact" },
 ];
 
-const securityBadges = ["Secure SSL Checkout", "Verified Reviews", "Verified UK Store"];
-
 const socials = [
   { label: "Instagram", href: "#" },
   { label: "Facebook", href: "#" },
   { label: "YouTube", href: "#" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const { avgRating, count } = await getSiteReviewSummary();
   return (
     <footer className="border-t border-border-subtle bg-white text-foreground">
       <div className="page-container grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 lg:grid-cols-3">
@@ -79,33 +80,20 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border-subtle">
-        <div className="page-container flex flex-col gap-3 py-5">
-          <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">Payment Methods</span>
-          <PaymentIcons />
-        </div>
-      </div>
-
-      <div className="border-t border-border-subtle">
-        <div className="page-container flex flex-col gap-3 py-5">
-          <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">Security</span>
-          <div className="flex flex-wrap gap-2">
-            {securityBadges.map((b) => (
-              <span
-                key={b}
-                className="inline-flex items-center gap-1.5 rounded-input border border-border-subtle px-2.5 py-1 text-xs font-medium text-foreground-strong"
-              >
-                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="#121212" strokeWidth={1.4}>
-                  <path d="M8 1.5l5.5 2v4c0 4-2.4 6.5-5.5 7.5-3.1-1-5.5-3.5-5.5-7.5v-4z" strokeLinejoin="round" />
-                </svg>
-                {b}
-              </span>
-            ))}
+        <div className="page-container flex flex-col items-center gap-8 py-6 sm:flex-row sm:justify-center sm:gap-16">
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">Payment Methods</span>
+            <PaymentIcons />
+          </div>
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-medium uppercase tracking-wide text-foreground/60">Security</span>
+            <SecurityBadges rating={avgRating} count={count} />
           </div>
         </div>
       </div>
 
       <div className="border-t border-border-subtle">
-        <div className="page-container py-5 text-xs text-foreground/60">
+        <div className="page-container py-5 text-center text-xs text-foreground/60">
           © {new Date().getFullYear()} Toolvo Drills Ltd. All rights reserved. Registered in England & Wales — 1
           Example Street, London, EC1A 1AA, United Kingdom.
         </div>

@@ -148,6 +148,7 @@ export function ToolIllustration({
   return (
     <svg
       viewBox={VIEWBOX}
+      preserveAspectRatio="xMidYMid slice"
       className={className}
       role="img"
       aria-label={variant.replace("-", " ")}

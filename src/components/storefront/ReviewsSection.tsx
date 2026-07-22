@@ -1,5 +1,6 @@
 import { StarRating } from "@/components/ui/StarRating";
 import { formatDate } from "@/lib/format";
+import { AutoScrollRow } from "@/components/ui/AutoScrollRow";
 
 type Review = {
   id: string;
@@ -54,18 +55,20 @@ export function ReviewsSection({
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           {reviews.length === 0 ? (
             <p className="text-sm text-foreground">No reviews yet — be the first to leave one.</p>
           ) : (
-            <div className="scrollbar-hidden -mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
+            <AutoScrollRow className="-mx-1 gap-4 px-1 pb-2">
               {reviews.map((r) => (
-                <div
-                  key={r.id}
-                  className="flex w-72 shrink-0 snap-start flex-col gap-2 rounded-button border border-border-subtle p-4"
-                >
+                <div key={r.id} className="flex w-72 shrink-0 flex-col gap-2 rounded-button border border-border-subtle p-4">
                   <div className="flex items-center justify-between">
-                    <StarRating rating={r.rating} />
+                    <div className="flex items-center gap-1.5">
+                      <StarRating rating={r.rating} />
+                      <svg viewBox="0 0 12 12" className="h-3 w-3 text-foreground/50" fill="none" stroke="currentColor" strokeWidth={1.4}>
+                        <path d="M2 6l2.5 2.5L10 3" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                     <span className="text-xs text-foreground/60">{formatDate(r.createdAt)}</span>
                   </div>
                   {r.title && <p className="text-sm font-semibold text-foreground-strong">{r.title}</p>}
@@ -86,7 +89,7 @@ export function ReviewsSection({
                   )}
                 </div>
               ))}
-            </div>
+            </AutoScrollRow>
           )}
         </div>
       </div>

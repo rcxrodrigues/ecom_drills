@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getProductCardsByCollection } from "@/lib/queries";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { DragScrollRow } from "@/components/ui/DragScrollRow";
 
 export type CollectionCarouselConfig = {
   collectionHandle: string;
@@ -20,11 +21,11 @@ export async function CollectionCarousel({ config }: { config: CollectionCarouse
             View all
           </Link>
         </div>
-        <div className="scrollbar-hidden -mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
+        <DragScrollRow className="-mx-1 gap-4 px-1 pb-2">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} className="w-44 shrink-0 snap-start sm:w-56" />
           ))}
-        </div>
+        </DragScrollRow>
       </div>
     </section>
   );
