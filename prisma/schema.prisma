@@ -202,6 +202,7 @@ model Order {
   deliveryMethod DeliveryMethod @default(STANDARD)
   status         OrderStatus    @default(PENDING)
   trackingNumber String?
+  stripePaymentIntentId String? @unique
   subtotal       Decimal        @db.Decimal(10, 2)
   discountCodeId String?
   discountCode   DiscountCode?  @relation(fields: [discountCodeId], references: [id])

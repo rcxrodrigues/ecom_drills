@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/format";
 import { Label, Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { ProductPicture } from "@/components/ui/ProductPicture";
-import { placeOrder } from "@/app/actions/checkout";
+import { CheckoutPaymentForm } from "@/components/storefront/CheckoutPaymentForm";
+import { placeOrder, createPaymentIntent } from "@/app/actions/checkout";
 import { checkDiscountCode } from "@/app/actions/discount";
 import Link from "next/link";
 
@@ -19,12 +19,12 @@ const DELIVERY_OPTIONS = [
 
 export default function CheckoutPage() {
   const cart = useCart();
-  const router = useRouter();
   const [deliveryMethod, setDeliveryMethod] = useState<(typeof DELIVERY_OPTIONS)[number]["value"]>("STANDARD");
   const [code, setCode] = useState(cart.discount?.code ?? "");
   const [codeError, setCodeError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [payment, setPayment] = useState<{ orderId: string; orderNumber: string; clientSecret: string; total: number } | null>(null);
 
   const freeStandard = deliveryMethod === "STANDARD" && cart.total >= 50;
   const shipping = freeStandard ? 0 : DELIVERY_OPTIONS.find((d) => d.value === deliveryMethod)!.price;
@@ -66,18 +66,37 @@ export default function CheckoutPage() {
         setFormError(result.error);
         return;
       }
-      cart.clear();
-      router.push(`/order-confirmation/${result.orderNumber}`);
+      const intent = await createPaymentIntent(result.orderId);
+      if (!intent.ok || !intent.clientSecret) {
+        setFormError(intent.ok ? "Could not start payment." : intent.error);
+        return;
+      }
+      setPayment({ orderId: result.orderId, orderNumber: result.orderNumber, clientSecret: intent.clientSecret, total: result.total });
     });
   }
 
-  if (cart.items.length === 0) {
+  if (cart.items.length === 0 && !payment) {
     return (
       <div className="page-container flex flex-col items-center gap-4 py-24 text-center">
         <p className="text-sm text-foreground">Your basket is empty.</p>
         <Link href="/" className="text-sm font-medium text-foreground-strong underline">
           Continue shopping
         </Link>
+      </div>
+    );
+  }
+
+  if (payment) {
+    return (
+      <div className="page-container max-w-lg py-10">
+        <h1 className="mb-2 text-2xl font-semibold text-foreground-strong">Payment</h1>
+        <p className="mb-8 text-sm text-foreground">Order {payment.orderNumber} — enter your card details to complete your purchase.</p>
+        <CheckoutPaymentForm
+          clientSecret={payment.clientSecret}
+          orderId={payment.orderId}
+          orderNumber={payment.orderNumber}
+          total={payment.total}
+        />
       </div>
     );
   }
@@ -165,7 +184,7 @@ export default function CheckoutPage() {
           {formError && <p className="text-sm text-red-600">{formError}</p>}
 
           <Button type="submit" size="lg" disabled={pending} className="w-full lg:hidden">
-            {pending ? "Placing order…" : `Place order — ${formatPrice(grandTotal)}`}
+            {pending ? "Please wait…" : `Continue to payment — ${formatPrice(grandTotal)}`}
           </Button>
         </div>
 
@@ -230,7 +249,7 @@ export default function CheckoutPage() {
           </div>
 
           <Button type="submit" size="lg" disabled={pending} className="mt-5 hidden w-full lg:flex">
-            {pending ? "Placing order…" : "Place order"}
+            {pending ? "Please wait…" : "Continue to payment"}
           </Button>
         </aside>
       </form>

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe";
 import { getCustomerSession } from "@/lib/auth";
 
 const checkoutSchema = z.object({
@@ -94,42 +95,96 @@ export async function placeOrder(input: z.infer<typeof checkoutSchema>) {
   const total = subtotal - discountAmount + shippingCost;
 
   const session = await getCustomerSession();
+  const customer = session
+    ? await prisma.customer.findUnique({ where: { id: session.customerId }, select: { id: true } })
+    : null;
 
-  const order = await prisma.$transaction(async (tx) => {
-    const created = await tx.order.create({
-      data: {
-        orderNumber: generateOrderNumber(),
-        customerId: session?.customerId ?? null,
-        email: data.email.trim().toLowerCase(),
-        phone: data.phone,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        addressLine1: data.addressLine1,
-        addressLine2: data.addressLine2,
-        city: data.city,
-        postcode: data.postcode,
-        deliveryMethod: data.deliveryMethod,
-        subtotal,
-        discountCodeId,
-        discountAmount,
-        shippingCost,
-        total,
-        items: { create: orderItemsData },
-      },
-    });
+  // Stock and discount usage are only applied once payment is confirmed
+  // (see confirmOrderPayment), so an abandoned/failed payment doesn't
+  // reserve stock or burn a discount use.
+  const order = await prisma.order.create({
+    data: {
+      orderNumber: generateOrderNumber(),
+      customerId: customer?.id ?? null,
+      email: data.email.trim().toLowerCase(),
+      phone: data.phone,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2,
+      city: data.city,
+      postcode: data.postcode,
+      deliveryMethod: data.deliveryMethod,
+      subtotal,
+      discountCodeId,
+      discountAmount,
+      shippingCost,
+      total,
+      items: { create: orderItemsData },
+    },
+  });
 
-    for (const item of data.items) {
+  return { ok: true as const, orderId: order.id, orderNumber: order.orderNumber, total };
+}
+
+export async function createPaymentIntent(orderId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
+  if (!order) return { ok: false as const, error: "Order not found." };
+  if (order.status === "PAID") return { ok: false as const, error: "This order has already been paid." };
+
+  const amountInPence = Math.round(Number(order.total) * 100);
+
+  if (order.stripePaymentIntentId) {
+    const existing = await stripe.paymentIntents.retrieve(order.stripePaymentIntentId);
+    if (existing.status !== "canceled" && existing.amount === amountInPence) {
+      return { ok: true as const, clientSecret: existing.client_secret };
+    }
+  }
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amountInPence,
+    currency: "gbp",
+    automatic_payment_methods: { enabled: true },
+    metadata: { orderId: order.id, orderNumber: order.orderNumber },
+    receipt_email: order.email,
+  });
+
+  await prisma.order.update({
+    where: { id: order.id },
+    data: { stripePaymentIntentId: paymentIntent.id },
+  });
+
+  return { ok: true as const, clientSecret: paymentIntent.client_secret };
+}
+
+export async function confirmOrderPayment(orderId: string) {
+  const order = await prisma.order.findUnique({ where: { id: orderId }, include: { items: true } });
+  if (!order) return { ok: false as const, error: "Order not found." };
+  if (order.status === "PAID") return { ok: true as const, orderNumber: order.orderNumber };
+  if (!order.stripePaymentIntentId) return { ok: false as const, error: "No payment found for this order." };
+
+  const paymentIntent = await stripe.paymentIntents.retrieve(order.stripePaymentIntentId);
+  if (paymentIntent.status !== "succeeded") {
+    return { ok: false as const, error: "Payment has not completed yet." };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const fresh = await tx.order.findUnique({ where: { id: order.id } });
+    if (fresh?.status === "PAID") return;
+
+    for (const item of order.items) {
+      if (!item.variantId) continue;
       await tx.productVariant.update({
         where: { id: item.variantId },
         data: { stock: { decrement: item.quantity } },
       });
     }
 
-    if (discountCodeId) {
-      await tx.discountCode.update({ where: { id: discountCodeId }, data: { usedCount: { increment: 1 } } });
+    if (order.discountCodeId) {
+      await tx.discountCode.update({ where: { id: order.discountCodeId }, data: { usedCount: { increment: 1 } } });
     }
 
-    return created;
+    await tx.order.update({ where: { id: order.id }, data: { status: "PAID" } });
   });
 
   return { ok: true as const, orderNumber: order.orderNumber };

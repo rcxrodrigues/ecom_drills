@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getOrderByNumber } from "@/lib/queries";
 import { formatPrice, formatDate } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/Button";
+import { ClearCartOnMount } from "@/components/storefront/ClearCartOnMount";
 
 export default async function OrderConfirmationPage({
   params,
@@ -15,6 +16,7 @@ export default async function OrderConfirmationPage({
 
   return (
     <div className="page-container max-w-2xl py-16 text-center">
+      <ClearCartOnMount />
       <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-brand-black">
         <svg viewBox="0 0 20 20" className="h-7 w-7" fill="none" stroke="white" strokeWidth={1.8}>
           <path d="M3 10.5l4.5 4.5L17 5.5" strokeLinecap="round" strokeLinejoin="round" />
