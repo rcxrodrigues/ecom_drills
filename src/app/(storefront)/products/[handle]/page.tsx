@@ -3,6 +3,7 @@ import { getProductByHandle, getCrossSellProducts } from "@/lib/queries";
 import { ProductGallery } from "@/components/storefront/ProductGallery";
 import { ProductPurchasePanel } from "@/components/storefront/ProductPurchasePanel";
 import { TrustBadges } from "@/components/storefront/TrustBadges";
+import { ProductReviewBadgeRow } from "@/components/storefront/ProductReviewBadgeRow";
 import { DeliveryEstimator } from "@/components/storefront/DeliveryEstimator";
 import { CompleteYourKit } from "@/components/storefront/CompleteYourKit";
 import { ReviewsSection } from "@/components/storefront/ReviewsSection";
@@ -64,8 +65,9 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
             ratingCount={product.ratingCount}
           />
 
-          <TrustBadges />
+          <ProductReviewBadgeRow rating={product.avgRating} count={product.ratingCount} />
           <DeliveryEstimator />
+          <TrustBadges />
 
           <Accordion
             items={[
