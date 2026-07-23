@@ -245,10 +245,11 @@ model Section {
 // ---------- Analytics ----------
 
 model Visit {
-  id        String   @id @default(cuid())
-  sessionId String
-  path      String
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  sessionId     String
+  path          String
+  hasCartItems  Boolean  @default(false)
+  createdAt     DateTime @default(now())
 
   @@index([sessionId])
   @@index([createdAt])

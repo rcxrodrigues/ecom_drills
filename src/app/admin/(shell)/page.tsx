@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getDashboardStats, getAnalyticsForRange, getLiveVisitorCount, type AnalyticsRange } from "@/lib/queries";
+import { getDashboardStats, getAnalyticsForRange, getLivePresenceBreakdown, type AnalyticsRange } from "@/lib/queries";
 import { formatPrice } from "@/lib/format";
 import { StatCard } from "@/components/admin/StatCard";
 import { LiveVisitorsCard } from "@/components/admin/LiveVisitorsCard";
@@ -18,17 +18,17 @@ export default async function AdminDashboardPage({
   const { range: rangeParam } = await searchParams;
   const range: AnalyticsRange = rangeParam === "D1" || rangeParam === "D7" || rangeParam === "D30" ? rangeParam : "D7";
 
-  const [stats, analytics, liveCount] = await Promise.all([
+  const [stats, analytics, presence] = await Promise.all([
     getDashboardStats(),
     getAnalyticsForRange(range),
-    getLiveVisitorCount(),
+    getLivePresenceBreakdown(),
   ]);
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold text-foreground-strong">Dashboard</h1>
 
-      <LiveVisitorsCard initialCount={liveCount} />
+      <LiveVisitorsCard initial={presence} />
 
       <div className="mt-8 flex items-center justify-between">
         <h2 className="text-base font-semibold text-foreground-strong">Store performance</h2>

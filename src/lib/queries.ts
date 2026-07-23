@@ -384,6 +384,29 @@ export async function getLiveVisitorCount(withinMinutes = 5) {
   return visits.length;
 }
 
+export async function getLivePresenceBreakdown(withinMinutes = 5) {
+  const since = new Date(Date.now() - withinMinutes * 60 * 1000);
+  // Latest visit per active session in the window (distinct + orderBy desc
+  // returns the first — i.e. most recent — row per sessionId in Postgres).
+  const latestPerSession = await prisma.visit.findMany({
+    where: { createdAt: { gte: since } },
+    orderBy: { createdAt: "desc" },
+    distinct: ["sessionId"],
+    select: { path: true, hasCartItems: true },
+  });
+
+  let checkout = 0;
+  let cart = 0;
+  let browsing = 0;
+  for (const v of latestPerSession) {
+    if (v.path.startsWith("/checkout")) checkout += 1;
+    else if (v.hasCartItems) cart += 1;
+    else browsing += 1;
+  }
+
+  return { browsing, cart, checkout, total: latestPerSession.length };
+}
+
 const ANALYTICS_RANGE_DAYS = { D1: 1, D7: 7, D30: 30 } as const;
 export type AnalyticsRange = keyof typeof ANALYTICS_RANGE_DAYS;
 
