@@ -106,7 +106,7 @@ export function Header({ collections }: { collections: NavCollection[] }) {
             className="absolute inset-0 bg-black/40 animate-fade-in"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 w-72 max-w-[80vw] animate-slide-in bg-white p-5 [animation-direction:reverse]">
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[80vw] animate-slide-in-left bg-white p-5">
             <button
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}

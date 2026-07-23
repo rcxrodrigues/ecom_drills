@@ -141,18 +141,30 @@ export async function getProductByHandle(handle: string) {
     include: {
       images: { orderBy: { position: "asc" } },
       variants: { orderBy: { position: "asc" } },
-      reviews: { where: { status: "APPROVED" }, orderBy: { createdAt: "desc" } },
+      reviews: {
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        take: 24,
+      },
     },
   });
   if (!product) return null;
 
   prisma.product.update({ where: { id: product.id }, data: { views: { increment: 1 } } }).catch(() => {});
 
-  const ratingCount = product.reviews.length;
-  const avgRating = ratingCount ? product.reviews.reduce((s, r) => s + r.rating, 0) / ratingCount : 0;
+  const [ratingCount, ratingAgg, distributionRaw] = await Promise.all([
+    prisma.review.count({ where: { productId: product.id, status: "APPROVED" } }),
+    prisma.review.aggregate({ where: { productId: product.id, status: "APPROVED" }, _avg: { rating: true } }),
+    prisma.review.groupBy({
+      by: ["rating"],
+      where: { productId: product.id, status: "APPROVED" },
+      _count: { rating: true },
+    }),
+  ]);
+  const avgRating = ratingAgg._avg.rating ?? 0;
   const distribution = [5, 4, 3, 2, 1].map((star) => ({
     star,
-    count: product.reviews.filter((r) => r.rating === star).length,
+    count: distributionRaw.find((d) => d.rating === star)?._count.rating ?? 0,
   }));
 
   return {

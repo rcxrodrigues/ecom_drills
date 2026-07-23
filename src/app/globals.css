@@ -23,11 +23,20 @@
   --container-page: 1600px;
 
   --animate-slide-in: slide-in 0.25s ease-out;
+  --animate-slide-in-left: slide-in-left 0.25s ease-out;
   --animate-fade-in: fade-in 0.2s ease-out;
 
   @keyframes slide-in {
     from {
       transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
     }
     to {
       transform: translateX(0);
