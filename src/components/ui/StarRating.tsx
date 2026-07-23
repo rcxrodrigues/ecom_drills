@@ -1,6 +1,6 @@
 function Star({ filled }: { filled: boolean }) {
   return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4" fill={filled ? "#121212" : "none"} stroke="#121212" strokeWidth={filled ? 0 : 1.2}>
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill={filled ? "#00B67A" : "none"} stroke={filled ? "#00B67A" : "#121212"} strokeWidth={filled ? 0 : 1.2}>
       <path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.2 5.9-.8z" />
     </svg>
   );
