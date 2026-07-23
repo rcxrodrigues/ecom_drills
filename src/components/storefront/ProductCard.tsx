@@ -27,9 +27,9 @@ export function ProductCard({ product, className = "" }: { product: ProductCardD
           )}
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 text-center">
         <h3 className="text-sm font-medium text-foreground-strong">{product.name}</h3>
-        <div className="mt-1 flex items-center gap-2">
+        <div className="mt-1 flex items-center justify-center gap-2">
           {product.salePrice ? (
             <>
               <span className="text-sm font-semibold text-foreground-strong">{formatPrice(product.salePrice)}</span>
