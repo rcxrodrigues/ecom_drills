@@ -39,7 +39,7 @@ export function Header({ collections }: { collections: NavCollection[] }) {
         </div>
 
         <Link href="/" aria-label="Toolvo Drills" className="shrink-0">
-          <Image src="/logo.png" alt="Toolvo Drills" width={140} height={40} className="h-8 w-auto sm:h-9" priority />
+          <Image src="/logo.png" alt="Toolvo Drills" width={200} height={57} className="h-11 w-auto sm:h-13" priority />
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-1">

@@ -25,7 +25,7 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-border-subtle bg-white">
       <div className="px-5 py-5">
-        <Image src="/logo.png" alt="Toolvo Drills" width={140} height={40} className="h-7 w-auto" />
+        <Image src="/logo.png" alt="Toolvo Drills" width={180} height={51} className="h-9 w-auto" />
         <p className="mt-1.5 text-xs text-foreground/60">Admin panel</p>
       </div>
       <nav className="flex flex-1 flex-col gap-0.5 px-3">
