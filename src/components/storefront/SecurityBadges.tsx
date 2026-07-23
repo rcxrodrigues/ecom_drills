@@ -1,8 +1,8 @@
-function Stars({ color = "white" }: { color?: string }) {
+function Stars() {
   return (
     <span className="flex gap-0.5">
       {[0, 1, 2, 3, 4].map((i) => (
-        <svg key={i} viewBox="0 0 12 12" className="h-2.5 w-2.5" fill={color}>
+        <svg key={i} viewBox="0 0 12 12" className="h-3 w-3" fill="#00B67A">
           <path d="M6 0.5l1.6 3.3 3.6.5-2.6 2.6.6 3.6L6 8.8 2.8 10.5l.6-3.6L.8 4.3l3.6-.5z" />
         </svg>
       ))}
@@ -12,10 +12,10 @@ function Stars({ color = "white" }: { color?: string }) {
 
 function ReviewsBadge({ rating, count }: { rating: number; count: number }) {
   return (
-    <div className="flex h-9 items-center gap-2 rounded-input bg-[#00B67A] px-2.5">
+    <div className="flex h-9 items-center gap-2 rounded-input border border-border-subtle bg-white px-2.5">
       <Stars />
-      <span className="text-xs font-bold text-white">{rating.toFixed(1)}</span>
-      <span className="text-[10px] text-white/85">Toolvo Reviews · {count}</span>
+      <span className="text-xs font-bold text-foreground-strong">{rating.toFixed(1)}</span>
+      <span className="text-[10px] text-foreground/70">Toolvo Reviews · {count}</span>
     </div>
   );
 }
