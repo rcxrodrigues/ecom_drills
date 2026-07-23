@@ -14,6 +14,41 @@ type Review = {
   createdAt: string;
 };
 
+function ReviewCard({ r, keyPrefix }: { r: Review; keyPrefix: string }) {
+  return (
+    <div
+      key={`${keyPrefix}-${r.id}`}
+      className="flex w-72 shrink-0 flex-col gap-2 rounded-button border border-border-subtle p-4"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <StarRating rating={r.rating} />
+          <svg viewBox="0 0 12 12" className="h-3 w-3 text-foreground/50" fill="none" stroke="currentColor" strokeWidth={1.4}>
+            <path d="M2 6l2.5 2.5L10 3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <span className="text-xs text-foreground/60">{formatDate(r.createdAt)}</span>
+      </div>
+      {r.title && <p className="text-sm font-semibold text-foreground-strong">{r.title}</p>}
+      <p className="flex-1 text-sm text-foreground">{r.body}</p>
+      <div className="flex flex-wrap items-center gap-2 text-xs text-foreground/70">
+        <span className="font-medium text-foreground-strong">{r.authorName}</span>
+        {r.location && <span>· {r.location}</span>}
+        {r.verifiedPurchase && (
+          <span className="inline-flex items-center gap-1 rounded-input bg-neutral-100 px-1.5 py-0.5 font-medium">
+            Verified Purchase
+          </span>
+        )}
+      </div>
+      {r.adminReply && (
+        <div className="rounded-input bg-neutral-50 p-3 text-xs text-foreground">
+          <span className="font-semibold text-foreground-strong">Toolvo Drills team:</span> {r.adminReply}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ReviewsSection({
   reviews,
   avgRating,
@@ -61,33 +96,10 @@ export function ReviewsSection({
           ) : (
             <AutoScrollRow className="-mx-1 gap-4 px-1 pb-2">
               {reviews.map((r) => (
-                <div key={r.id} className="flex w-72 shrink-0 flex-col gap-2 rounded-button border border-border-subtle p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <StarRating rating={r.rating} />
-                      <svg viewBox="0 0 12 12" className="h-3 w-3 text-foreground/50" fill="none" stroke="currentColor" strokeWidth={1.4}>
-                        <path d="M2 6l2.5 2.5L10 3" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <span className="text-xs text-foreground/60">{formatDate(r.createdAt)}</span>
-                  </div>
-                  {r.title && <p className="text-sm font-semibold text-foreground-strong">{r.title}</p>}
-                  <p className="flex-1 text-sm text-foreground">{r.body}</p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-foreground/70">
-                    <span className="font-medium text-foreground-strong">{r.authorName}</span>
-                    {r.location && <span>· {r.location}</span>}
-                    {r.verifiedPurchase && (
-                      <span className="inline-flex items-center gap-1 rounded-input bg-neutral-100 px-1.5 py-0.5 font-medium">
-                        Verified Purchase
-                      </span>
-                    )}
-                  </div>
-                  {r.adminReply && (
-                    <div className="rounded-input bg-neutral-50 p-3 text-xs text-foreground">
-                      <span className="font-semibold text-foreground-strong">Toolvo Drills team:</span> {r.adminReply}
-                    </div>
-                  )}
-                </div>
+                <ReviewCard key={`a-${r.id}`} r={r} keyPrefix="a" />
+              ))}
+              {reviews.map((r) => (
+                <ReviewCard key={`b-${r.id}`} r={r} keyPrefix="b" />
               ))}
             </AutoScrollRow>
           )}

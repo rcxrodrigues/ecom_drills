@@ -1,13 +1,13 @@
 "use client";
 
-import { cloneElement, isValidElement, useEffect, useRef, type ReactElement, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export function AutoScrollRow({
   children,
   className = "",
   speed = 0.4,
 }: {
-  children: ReactElement[];
+  children: ReactNode;
   className?: string;
   speed?: number;
 }) {
@@ -68,10 +68,6 @@ export function AutoScrollRow({
     }
   }
 
-  const duplicated: ReactNode[] = children
-    .filter(isValidElement)
-    .map((child) => cloneElement(child, { key: `dup-${child.key}` }));
-
   return (
     <div
       ref={ref}
@@ -89,7 +85,6 @@ export function AutoScrollRow({
       className={`scrollbar-hidden flex cursor-grab overflow-x-auto active:cursor-grabbing ${className}`}
     >
       {children}
-      {duplicated}
     </div>
   );
 }
