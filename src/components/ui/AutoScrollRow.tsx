@@ -35,6 +35,7 @@ export function AutoScrollRow({
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = ref.current;
     if (!el) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     state.current.dragging = true;
     state.current.moved = false;
     state.current.startX = e.clientX;
@@ -46,7 +47,8 @@ export function AutoScrollRow({
     const el = ref.current;
     if (!el || !state.current.dragging) return;
     const delta = e.clientX - state.current.startX;
-    if (Math.abs(delta) > 4) state.current.moved = true;
+    if (Math.abs(delta) <= 10) return;
+    state.current.moved = true;
     let next = state.current.startScroll - delta;
     const half = el.scrollWidth / 2;
     if (half > 0) {

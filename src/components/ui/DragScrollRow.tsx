@@ -9,6 +9,7 @@ export function DragScrollRow({ children, className = "" }: { children: ReactNod
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     const el = ref.current;
     if (!el) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
     state.current = { dragging: true, moved: false, startX: e.clientX, startScroll: el.scrollLeft };
     el.setPointerCapture(e.pointerId);
   }
@@ -17,8 +18,10 @@ export function DragScrollRow({ children, className = "" }: { children: ReactNod
     const el = ref.current;
     if (!el || !state.current.dragging) return;
     const delta = e.clientX - state.current.startX;
-    if (Math.abs(delta) > 4) state.current.moved = true;
-    el.scrollLeft = state.current.startScroll - delta;
+    if (Math.abs(delta) > 10) {
+      state.current.moved = true;
+      el.scrollLeft = state.current.startScroll - delta;
+    }
   }
 
   function endDrag() {
