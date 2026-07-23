@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
@@ -37,8 +38,8 @@ export function Header({ collections }: { collections: NavCollection[] }) {
           </button>
         </div>
 
-        <Link href="/" className="text-xl font-bold tracking-tight text-foreground-strong">
-          TOOLVO DRILLS
+        <Link href="/" aria-label="Toolvo Drills" className="shrink-0">
+          <Image src="/logo.png" alt="Toolvo Drills" width={140} height={40} className="h-8 w-auto sm:h-9" priority />
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-1">

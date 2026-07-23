@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
@@ -24,8 +25,8 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-border-subtle bg-white">
       <div className="px-5 py-5">
-        <span className="text-sm font-bold tracking-tight text-foreground-strong">TOOLVO DRILLS</span>
-        <p className="mt-0.5 text-xs text-foreground/60">Admin panel</p>
+        <Image src="/logo.png" alt="Toolvo Drills" width={140} height={40} className="h-7 w-auto" />
+        <p className="mt-1.5 text-xs text-foreground/60">Admin panel</p>
       </div>
       <nav className="flex flex-1 flex-col gap-0.5 px-3">
         {links.map((link) => {
