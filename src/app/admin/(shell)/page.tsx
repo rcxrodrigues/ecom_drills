@@ -1,16 +1,60 @@
 import Link from "next/link";
-import { getDashboardStats } from "@/lib/queries";
+import { getDashboardStats, getAnalyticsForRange, getLiveVisitorCount, type AnalyticsRange } from "@/lib/queries";
 import { formatPrice } from "@/lib/format";
 import { StatCard } from "@/components/admin/StatCard";
+import { LiveVisitorsCard } from "@/components/admin/LiveVisitorsCard";
 
-export default async function AdminDashboardPage() {
-  const stats = await getDashboardStats();
+const RANGE_LABELS: Record<AnalyticsRange, string> = {
+  D1: "Last 24 hours",
+  D7: "Last 7 days",
+  D30: "Last 30 days",
+};
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const { range: rangeParam } = await searchParams;
+  const range: AnalyticsRange = rangeParam === "D1" || rangeParam === "D7" || rangeParam === "D30" ? rangeParam : "D7";
+
+  const [stats, analytics, liveCount] = await Promise.all([
+    getDashboardStats(),
+    getAnalyticsForRange(range),
+    getLiveVisitorCount(),
+  ]);
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold text-foreground-strong">Dashboard</h1>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <LiveVisitorsCard initialCount={liveCount} />
+
+      <div className="mt-8 flex items-center justify-between">
+        <h2 className="text-base font-semibold text-foreground-strong">Store performance</h2>
+        <div className="flex gap-1 rounded-button border border-border-subtle bg-white p-1">
+          {(Object.keys(RANGE_LABELS) as AnalyticsRange[]).map((r) => (
+            <Link
+              key={r}
+              href={`/admin?range=${r}`}
+              className={`rounded-input px-3 py-1.5 text-xs font-medium ${
+                range === r ? "bg-brand-black text-white" : "text-foreground-strong hover:bg-neutral-100"
+              }`}
+            >
+              {r === "D1" ? "D-1" : r === "D7" ? "D-7" : "D-30"}
+            </Link>
+          ))}
+        </div>
+      </div>
+      <p className="mb-4 text-xs text-foreground/60">{RANGE_LABELS[range]}</p>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Visits" value={String(analytics.visitCount)} sublabel="unique sessions" />
+        <StatCard label="Orders" value={String(analytics.orderCount)} sublabel={`${analytics.paidOrderCount} paid`} />
+        <StatCard label="Sales" value={formatPrice(analytics.sales)} sublabel="paid orders only" />
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total sales" value={formatPrice(stats.totalSales)} sublabel={`${stats.orderCount} orders`} />
         <StatCard
           label="Sales (last 30 days)"

@@ -241,3 +241,15 @@ model Section {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 }
+
+// ---------- Analytics ----------
+
+model Visit {
+  id        String   @id @default(cuid())
+  sessionId String
+  path      String
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([createdAt])
+}

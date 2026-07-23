@@ -374,6 +374,41 @@ export async function getDashboardStats() {
   };
 }
 
+export async function getLiveVisitorCount(withinMinutes = 5) {
+  const since = new Date(Date.now() - withinMinutes * 60 * 1000);
+  const visits = await prisma.visit.findMany({
+    where: { createdAt: { gte: since } },
+    select: { sessionId: true },
+    distinct: ["sessionId"],
+  });
+  return visits.length;
+}
+
+const ANALYTICS_RANGE_DAYS = { D1: 1, D7: 7, D30: 30 } as const;
+export type AnalyticsRange = keyof typeof ANALYTICS_RANGE_DAYS;
+
+export async function getAnalyticsForRange(range: AnalyticsRange) {
+  const since = new Date(Date.now() - ANALYTICS_RANGE_DAYS[range] * 24 * 60 * 60 * 1000);
+
+  const [visits, orders] = await Promise.all([
+    prisma.visit.findMany({ where: { createdAt: { gte: since } }, select: { sessionId: true }, distinct: ["sessionId"] }),
+    prisma.order.findMany({
+      where: { createdAt: { gte: since }, status: { not: "CANCELLED" } },
+      select: { total: true, status: true },
+    }),
+  ]);
+
+  const paidOrders = orders.filter((o) => o.status === "PAID");
+  const sales = paidOrders.reduce((sum, o) => sum + toNum(o.total), 0);
+
+  return {
+    visitCount: visits.length,
+    orderCount: orders.length,
+    paidOrderCount: paidOrders.length,
+    sales,
+  };
+}
+
 export async function searchProducts(q: string) {
   if (!q.trim()) return [];
   const results = await prisma.product.findMany({

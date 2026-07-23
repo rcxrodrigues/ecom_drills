@@ -4,6 +4,7 @@ import { AnnouncementBar } from "@/components/storefront/AnnouncementBar";
 import { Header } from "@/components/storefront/Header";
 import { Footer } from "@/components/storefront/Footer";
 import { CartDrawer } from "@/components/storefront/CartDrawer";
+import { VisitTracker } from "@/components/storefront/VisitTracker";
 
 export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
   const collections = await getAllCollections();
@@ -13,6 +14,7 @@ export default async function StorefrontLayout({ children }: { children: React.R
 
   return (
     <CartProvider>
+      <VisitTracker />
       <AnnouncementBar />
       <Header collections={navCollections} />
       <main className="flex-1">{children}</main>
